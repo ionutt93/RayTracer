@@ -125,12 +125,14 @@ int main(int argc, char const *argv[])
 	Color prettyGreen(0.5, 1.0, 0.5, 0.3); 
 	Color gray(0.5, 0.5, 0.5, 0.0);
 	Color black(0.0, 0.0, 0.0, 0.0);
+	Color maroon(0.5, 0.25, 0.25, 0.0);
 
 	Vect lightPosition(-7, 10, -10);
 	Light sceneLight(lightPosition, whiteLight);
 
 	// scene objects
 	Sphere sceneSphere(O, 1, prettyGreen);
+	Plane scenePlane(Y, -1, maroon);
 
 
 

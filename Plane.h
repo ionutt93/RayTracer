@@ -39,6 +39,7 @@ public:
 		else
 		{
 			double b = normal.DotProduct(ray.GetRayOrigin().VectAdd(normal.VectMult(distance).Negative()));
+			return -1 * b / a;
 		}
 	}
 };
