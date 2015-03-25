@@ -15,6 +15,9 @@
 #include "Camera.h"
 #include "Color.h"
 #include "Light.h"
+#include "Object.h"
+#include "Sphere.h"
+#include "Plane.h"
 
 struct RGBType
 {
@@ -103,10 +106,11 @@ int main(int argc, char const *argv[])
 	RGBType *pixels = new RGBType[n];
 	int thisOne;
 
-	Vect X (1, 0, 0);
-	Vect Y (0, 1, 0);
-	Vect Z (0, 0, 1);
-
+	Vect O(0, 0, 0);
+	Vect X(1, 0, 0);
+	Vect Y(0, 1, 0);
+	Vect Z(0, 0, 1);
+ 
 	Vect camPos(3.f, 1.5f, -4.f);
 	Vect lookAt(0, 0, 0);
 	Vect diffBtw(camPos.getVectX() - lookAt.getVectX(), camPos.getVectY() - lookAt.getVectY(), camPos.getVectZ() - lookAt.getVectZ());
@@ -124,6 +128,11 @@ int main(int argc, char const *argv[])
 
 	Vect lightPosition(-7, 10, -10);
 	Light sceneLight(lightPosition, whiteLight);
+
+	// scene objects
+	Sphere sceneSphere(O, 1, prettyGreen);
+
+
 
 	for (int x = 0; x < height; x++)
 	{
