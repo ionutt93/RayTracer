@@ -11,9 +11,9 @@ class Object
 public:
 	Object();
 
-	Color GetObjectColor() { return Color(0.0, 0.0, 0.0, 0.0); }
+	virtual Color GetColor() { return Color(0.0, 0.0, 0.0, 0.0); }
 
-	double FindIntersection(Ray ray) { return 0; }
+	virtual	double FindIntersection(Ray ray) { return 0; }
 };
 
 Object::Object() {}

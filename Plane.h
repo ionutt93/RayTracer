@@ -19,14 +19,14 @@ public:
 	
 	Vect GetPlaneNormal()     { return normal;   }
 	double GetPlaneDistance() { return distance; }
-	Color GetPlaneColor()     { return color;    }
+	virtual Color GetColor()     { return color;    }
 
 	Vect GetNormalAt(Vect point)
 	{
 		return normal;
 	}
 
-	double FindIntersection(Ray ray)
+	virtual	double FindIntersection(Ray ray)
 	{
 		Vect rayDirection = ray.GetRayDirection();
 

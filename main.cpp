@@ -94,6 +94,67 @@ void savebmp(const char *filename, int w, int h, int dpi, RGBType *data)
 
 using namespace std;
 
+int WinningObjectIndex(vector<double> objectIntersections)
+{
+	// return the index of the winning intersection
+	int indexOfMinimumValue;
+	// prevent unnecesary calculations
+	if (objectIntersections.size() == 0)
+	{
+		// if there are no intersections
+		return -1;
+	}
+	else if (objectIntersections.size() == 1)
+	{
+		// if there is only one intersection
+		if (objectIntersections.at(0) > 0)
+		{
+			// if that intersection is greater than 0 then it's our index of minimum value
+			return 0;
+		}
+		else
+		{
+			// the only intersection value is negative
+			return -1;
+		}
+	}
+	else
+	{
+		// otherwise there is more than one intersection
+		// first find the maximum value
+
+		double max = 0;
+		for (int i = 0; i < objectIntersections.size(); i++)
+		{
+			if (max < objectIntersections.at(i))
+			{
+				max = objectIntersections.at(i);
+			}
+		}
+
+		// then starting from the maximum value find the minimum positive value
+		if (max > 0)
+		{
+			// we only want positive intersections
+			for (int i = 0; i < objectIntersections.size(); i++)
+			{
+				if (objectIntersections.at(i) > 0 && objectIntersections.at(i) <= max)
+				{
+					max = objectIntersections.at(i);
+					indexOfMinimumValue = i;
+				}
+			}
+			
+			return indexOfMinimumValue;
+		}
+		else
+		{
+			// all the intersections are negative
+			return -1;
+		}
+	}
+}
+
 int main(int argc, char const *argv[])
 {
 	cout << "rendering ..." << endl;
@@ -102,6 +163,10 @@ int main(int argc, char const *argv[])
 	int width  = 640;
 	int height = 480;
 	int n      = width * height;
+
+	double aspectRatio  = (double) width / (double) height;
+	double ambientLight = 0.2;
+	double accuracy     = 0.00001;
 
 	RGBType *pixels = new RGBType[n];
 	int thisOne;
@@ -119,7 +184,7 @@ int main(int argc, char const *argv[])
 	Vect camRight = Y.CrossProduct(camDir).Normalize();
 	Vect camDown  = camRight.CrossProduct(camDir).Normalize();
 
-	Camera sceneCame(camPos, camDir, camRight, camDown);  
+	Camera sceneCam(camPos, camDir, camRight, camDown);  
 
 	Color whiteLight(1.0, 1.0, 1.0, 0.0);
 	Color prettyGreen(0.5, 1.0, 0.5, 0.3); 
@@ -135,24 +200,72 @@ int main(int argc, char const *argv[])
 	Plane scenePlane(Y, -1, maroon);
 
 
+	double xAmount, yAmount;
+	Vect camRayOrigin = sceneCam.getCameraPosition();
+	Vect camRayDirection;
 
-	for (int x = 0; x < height; x++)
+	// create array of scene objects and add them
+	vector<Object*> sceneObjects;
+	sceneObjects.push_back(dynamic_cast<Object*>(&sceneSphere));
+	sceneObjects.push_back(dynamic_cast<Object*>(&scenePlane));
+
+	for (int y = 0; y < height; y++)
 	{
-		for (int y = 0; y < width; y++)
+		for (int x = 0; x < width; x++)
 		{
-			thisOne = x * width + y;
-			
-			if ((x > 200 && x < 280) && (y > 200 && y < 440))
+			thisOne = y * width + x;
+
+			// start with no antialisng
+			if (width > height)
 			{
-				pixels[thisOne].r = 23;
-				pixels[thisOne].g = 222;
-				pixels[thisOne].b = 10;
+				 xAmount = ((x + 0.5) / width) * aspectRatio - (((width - height) / (double) height / 2));
+				 yAmount = ((height - y) + 0.5) / height;
+			}
+			else if (width < height)
+			{
+				xAmount = (x + 0.5) / width;
+				yAmount = (((height - y) + 0.5) / height) / aspectRatio - (((height - width) / (double) width) / 2);
 			}
 			else
 			{
+				xAmount = (x + 0.5) / width;
+				yAmount = ((height - y) + 0.5) / height;
+			}
+
+			camRayDirection = camDir.VectAdd(camRight.VectMult(xAmount - 0.5)
+									.VectAdd(camDown.VectMult(yAmount - 0.5)))
+									.Normalize();
+			Ray camRay(camRayOrigin, camRayDirection);
+
+			vector<double> intersections;
+
+			for (int index = 0; index < sceneObjects.size(); index++)
+			{
+				intersections.push_back(sceneObjects.at(index)->FindIntersection(camRay));
+			}
+
+			int indexOfWinningObject = WinningObjectIndex(intersections);
+			
+			if (indexOfWinningObject == -1)
+			{
+				// set background white
 				pixels[thisOne].r = 0;
 				pixels[thisOne].g = 0;
 				pixels[thisOne].b = 0;
+			}
+			else
+			{
+				// index corresponds to object in scene
+				if (intersections.at(indexOfWinningObject) > accuracy)
+				{
+					// determine the position and direction vectors at the point of intersection
+					Vect intersectionPosition = camRayOrigin.VectAdd();
+
+					Color thisColor = sceneObjects.at(indexOfWinningObject)->GetColor();
+					pixels[thisOne].r = thisColor.GetColorRed();
+					pixels[thisOne].g = thisColor.GetColorGreen();
+					pixels[thisOne].b = thisColor.GetColorBlue();
+				}
 			}
 		}
 	}
