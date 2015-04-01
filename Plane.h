@@ -21,7 +21,7 @@ public:
 	double GetPlaneDistance() { return distance; }
 	virtual Color GetColor()     { return color;    }
 
-	Vect GetNormalAt(Vect point)
+	virtual Vect GetNormalAt(Vect point)
 	{
 		return normal;
 	}
@@ -39,7 +39,7 @@ public:
 		else
 		{
 			double b = normal.DotProduct(ray.GetRayOrigin().VectAdd(normal.VectMult(distance).Negative()));
-			return -1 * b / a;
+			return -1 * b / a - 0.000001;
 		}
 	}
 };

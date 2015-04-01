@@ -14,6 +14,8 @@ public:
 	virtual Color GetColor() { return Color(0.0, 0.0, 0.0, 0.0); }
 
 	virtual	double FindIntersection(Ray ray) { return 0; }
+
+	virtual Vect GetNormalAt(Vect point) { return Vect(0, 0, 0); }
 };
 
 Object::Object() {}

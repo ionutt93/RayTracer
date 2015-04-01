@@ -3,12 +3,14 @@
 
 #include "Vect.h"
 
+
 class Camera
 {
 	Vect camPos;
 	Vect camDir;
 	Vect camRight;
 	Vect camDown;
+
 public:
 	Camera();
 	Camera(Vect, Vect, Vect, Vect);

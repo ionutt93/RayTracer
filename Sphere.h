@@ -21,7 +21,7 @@ public:
 	double GetSphereRadius() { return radius; }
 	virtual Color GetColor()   { return color;  }
 
-	Vect getNormalAt(Vect point)
+	virtual Vect GetNormalAt(Vect point)
 	{
 		Vect normalVect = point.VectAdd(center.Negative()).Normalize();
 		return normalVect;
@@ -58,7 +58,7 @@ public:
 		{
 			// the ray intersects the sphere
 			// the first root
-			double root1 = ((-1 * b - sqrt(discriminant)) / 2) - 0.00001;
+			double root1 = ((-1 * b - sqrt(discriminant)) / 2) - 0.000001;
 
 			if (root1 > 0)
 			{
@@ -68,7 +68,7 @@ public:
 			else
 			{
 				// the second root is the smallest positive root
-				double root2 = ((sqrt(discriminant) - b) / 2) - 0.00001;	
+				double root2 = ((sqrt(discriminant) - b) / 2) - 0.000001;	
 				return root2;
 			}
 		}

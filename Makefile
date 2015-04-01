@@ -6,10 +6,11 @@ raytracer: $(OBJ)
 	rm -f $(OBJ)
 
 main.o:
-	g++ -c main.cpp $(INC)
+	g++ -O3 -c main.cpp $(INC)
 
 clean:
 	rm -f $(OBJ) raytracer
 
 run:
 	./raytracer.exe
+	open first_scene.bmp
