@@ -11,15 +11,32 @@ class Sphere : public Object
 	Vect center;
 	double radius;
 	Color color;
+	Material material;
 
 public:
 	Sphere();
 
-	Sphere(Vect, double, Color);
+	Sphere(Vect, double, Color, Material);
 	
-	Vect GetSphereCenter()   { return center; }
-	double GetSphereRadius() { return radius; }
-	virtual Color GetColor()   { return color;  }
+	Vect GetSphereCenter()   
+	{ 
+		return center; 
+	}
+
+	double GetSphereRadius() 
+	{ 
+		return radius; 
+	}
+
+	virtual Color GetColor()   
+	{ 
+		return color;  
+	}
+
+	virtual Material GetMaterial()
+	{
+		return material;
+	}
 
 	virtual Vect GetNormalAt(Vect point)
 	{
@@ -82,16 +99,18 @@ public:
 
 Sphere::Sphere()
 {
-	center = Vect(0, 0, 0);
-	radius = 1.0;
-	color  = Color(0.5, 0.5, 0.5, 0);
+	center   = Vect(0, 0, 0);
+	radius   = 1.0;
+	color    = Color(0.5, 0.5, 0.5);
+	material = Material();
 }
 
-Sphere::Sphere(Vect c, double r, Color co)
+Sphere::Sphere(Vect c, double r, Color co, Material m)
 {
-	center = c;
-	radius = r;
-	color  = co;
+	center   = c;
+	radius   = r;
+	color    = co;
+	material = m;
 }
 
 #endif // SPHERE_H

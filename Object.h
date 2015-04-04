@@ -4,14 +4,16 @@
 #include "Ray.h"
 #include "Vect.h"
 #include "Color.h"
+#include "Material.h"
 
 class Object
 {
-
 public:
 	Object();
 
-	virtual Color GetColor() { return Color(0.0, 0.0, 0.0, 0.0); }
+	virtual Color GetColor() { return Color(0.0, 0.0, 0.0); }
+
+	virtual Material GetMaterial() { return Material(); }
 
 	virtual	double FindIntersection(Ray ray) { return 0; }
 

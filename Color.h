@@ -3,22 +3,24 @@
 
 class Color
 {
-	double red, green, blue, special;
+	double red, green, blue;
 
 public:
 	Color();
 
-	Color(double, double, double, double);
+	// Color(double, double, double, double);
+	Color(double, double, double);
+
 
 	double GetColorRed()     { return red;     }
 	double GetColorGreen()   { return green;   }
 	double GetColorBlue()    { return blue;    }
-	double GetColorSpecial() { return special; }
+	// double GetColorSpecial() { return special; }
 
 	void SetColorRed(double value)     { red     = value; }
 	void SetColorGreen(double value)   { green   = value; }
 	void SetColorBlue(double value)    { blue    = value; }
-	void SetColorSpecial(double value) { special = value; }
+	// void SetColorSpecial(double value) { special = value; }
 
 	double GetBrightness()
 	{
@@ -29,32 +31,32 @@ public:
 	{
 		return Color(red * scalar, 
 					 green * scalar, 
-					 blue * scalar, 
-					 special);
+					 blue * scalar); 
+					 // special);
 	}
 
 	Color ColorAdd(Color c)
 	{
 		return Color(red   + c.GetColorRed(), 
 					 green + c.GetColorGreen(), 
-					 blue  + c.GetColorBlue(),
-					 special);
+					 blue  + c.GetColorBlue());
+					 // special);
 	}
 
 	Color ColorMultiply(Color c)
 	{
 		return Color(red   * c.GetColorRed(), 
 					 green * c.GetColorGreen(), 
-					 blue  * c.GetColorBlue(),
-					 special);
+					 blue  * c.GetColorBlue());
+					 // special);
 	}
 
 	Color ColorAverage(Color c)
 	{
 		return Color((red   + c.GetColorRed())   / 2, 
 					 (green + c.GetColorGreen()) / 2, 
-					 (blue  + c.GetColorBlue())  / 2,
-					 special);
+					 (blue  + c.GetColorBlue())  / 2);
+					 // special);
 	}
 
 	Color Clip()
@@ -77,7 +79,7 @@ public:
 		if (green < 0) green = 0;
 		if (blue  < 0) blue  = 0;
 
-		return Color(red, green, blue, special);
+		return Color(red, green, blue);
 	}
 
 };
@@ -87,15 +89,15 @@ Color::Color()
 	red   = 0.5;
 	green = 0.5;
 	blue  = 0.5;
-	special = 0;
+	// special = 0;
 }
 
-Color::Color(double r, double g, double b, double s)
+Color::Color(double r, double g, double b)
 {
 	red     = r;
 	green   = g;
 	blue    = b;
-	special = s;
+	// special = s;
 }
 
 #endif // COLOR_H
