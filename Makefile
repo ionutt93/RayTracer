@@ -2,7 +2,7 @@ OBJ = main.o
 INC = -I "./"
 
 raytracer: $(OBJ)
-	g++ $(OBJ) -o raytracer.exe
+	g++ -O3 $(OBJ) -o raytracer.exe
 	rm -f $(OBJ)
 
 main.o:

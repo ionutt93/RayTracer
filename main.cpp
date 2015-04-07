@@ -19,6 +19,8 @@
 #include "Source.h"
 #include "Sphere.h"
 #include "Plane.h"
+#include "Triangle.h"
+
 
 struct RGBType
 {
@@ -251,13 +253,13 @@ Color GetColorAt(Vect intersectionPosition,
 				 double accuracy, 
 				 double ambientLight)
 {
-	printf("Getting them colors\n");	
+	//printf("Getting them colors\n");	
 	Color winningObjectColor       = sceneObjects.at(indexOfWinningObject)->GetColor();
 	Vect winningObjectNormal       = sceneObjects.at(indexOfWinningObject)->GetNormalAt(intersectionPosition);
 	Material winningObjectMaterial = sceneObjects.at(indexOfWinningObject)->GetMaterial();
 	Vect intersectingRayDirection  = intersectionRay.GetRayDirection();
 
-	printf("Got stuff in get color at\n");
+	//printf("Got stuff in get color at\n");
 
 	if (winningObjectMaterial.GetIsTile() == true)
 	{
@@ -279,38 +281,37 @@ Color GetColorAt(Vect intersectionPosition,
 		}
 	}
 
-	printf("Checked for tile\n");
+	//printf("Checked for tile\n");
 
 	Color finalColor = winningObjectColor.ColorScalar(ambientLight);
 
-	printf("Got ambientLight\n");
+	//printf("Got ambientLight\n");
 	// refraction
-	// static bool refracting = false;
-	// if (winningObjectMaterial.GetIsRefractive() == true)
-	// {
-	// 	printf("Is refractive\n");
-	// 	printf("ID: %d\n", intersectionRay.GetID());
+	//if (winningObjectMaterial.GetIsRefractive() == true)
+	//{
+		//printf("Is refractive\n");
+		//printf("ID: %d\n", intersectionRay.GetID());
 
-	// 	Vect refractionPosition = intersectionPosition.VectAdd(Vect(accuracy* 10, accuracy * 10, accuracy * 10));
-	// 	// refracting = true;
-	// 	Color refractionColor = GetRefractedColor( intersectionRay,
-	// 											   refractionPosition,
-	// 											   sceneObjects,
-	// 											   indexOfWinningObject,
-	// 											   lightSources,
-	// 											   accuracy,
-	// 											   ambientLight);
+		//Vect refractionPosition = intersectionPosition.VectAdd(Vect(accuracy* 10, accuracy * 10, accuracy * 10));
+		//// refracting = true;
+		//Color refractionColor = GetRefractedColor( intersectionRay,
+												   //refractionPosition,
+												   //sceneObjects,
+												   //indexOfWinningObject,
+												   //lightSources,
+												   //accuracy,
+												   //ambientLight);
 
-	// 	// refracting = false;
-	// 	finalColor = refractionColor;
-	// }
+		//// refracting = false;
+		//finalColor = refractionColor;
+	//}
 
 
 	// printf("Checked for refraction\n");
 
 	if (winningObjectMaterial.GetIsReflective() == true && intersectionRay.GetRefractiveIndex() != winningObjectMaterial.GetRefractiveIndex())
 	{
-		printf("Material is reflective\n");
+		//printf("Material is reflective\n");
 		// reflection of objects with specular intersection
 		double dot1  = -winningObjectNormal.DotProduct(intersectingRayDirection); 
 		Vect scalar1 = winningObjectNormal.VectMult(dot1);
@@ -321,7 +322,7 @@ Color GetColorAt(Vect intersectionPosition,
 
 		Ray reflectionRay(intersectionPosition, reflectionDirection, 1.000293, intersectionRay.GetID());
 
-		printf("Computed the new ray\n");
+		//printf("Computed the new ray\n");
 
 		// determine what the ray intersects first
 		vector<double> reflectionIntersections;
@@ -330,10 +331,10 @@ Color GetColorAt(Vect intersectionPosition,
 			reflectionIntersections.push_back(sceneObjects.at(reflectionIndex)->FindIntersection(reflectionRay));
 		}
 
-		printf("Found intersections\n");
+		//printf("Found intersections\n");
 
 		int indexOfWinningObjectWithReflection = WinningObjectIndex(reflectionIntersections);
-		printf("Got winning object index %d\n", indexOfWinningObjectWithReflection);
+		//printf("Got winning object index %d\n", indexOfWinningObjectWithReflection);
 		if (indexOfWinningObjectWithReflection != -1)
 		{
 			// reflection ray missed everything else
@@ -344,13 +345,13 @@ Color GetColorAt(Vect intersectionPosition,
 				Vect reflectionIntersectionPosition     = intersectionPosition.VectAdd(reflectionDirection.VectMult(reflectionIntersections.at(indexOfWinningObjectWithReflection)));
 				Vect reflectionIntersectingRayDirection = reflectionDirection;
 
-				printf("Computed position and direction\n");
-				printf("Position: %f %f %f \n", reflectionIntersectionPosition.getVectX(), reflectionIntersectionPosition.getVectY(), reflectionIntersectionPosition.getVectZ());
-				printf("Direction: %f %f %f \n", reflectionIntersectingRayDirection.getVectX(), reflectionIntersectingRayDirection .getVectY(), reflectionIntersectingRayDirection .getVectZ());
+				//printf("Computed position and direction\n");
+				//printf("Position: %f %f %f \n", reflectionIntersectionPosition.getVectX(), reflectionIntersectionPosition.getVectY(), reflectionIntersectionPosition.getVectZ());
+				//printf("Direction: %f %f %f \n", reflectionIntersectingRayDirection.getVectX(), reflectionIntersectingRayDirection .getVectY(), reflectionIntersectingRayDirection .getVectZ());
 				Color reflectionIntersectionColor = GetColorAt(reflectionIntersectionPosition, reflectionRay,
 															   sceneObjects, indexOfWinningObjectWithReflection, lightSources, 
 															   accuracy, ambientLight);
-				printf("Got reflected color\n");
+				//printf("Got reflected color\n");
 				finalColor = finalColor.ColorAdd(reflectionIntersectionColor.ColorScalar(winningObjectMaterial.GetReflectiveness()));
 			}
 		}
@@ -362,8 +363,20 @@ Color GetColorAt(Vect intersectionPosition,
 	{
 		Vect lightDirection = lightSources.at(lightIndex)->GetLightPosition().VectAdd(intersectionPosition.Negative()).Normalize();
 
+						// checking if object is triangle
+		Triangle* t = dynamic_cast<Triangle*>(sceneObjects.at(indexOfWinningObject));
+		bool isTriangle = false;
+		if (t != NULL) {
+			isTriangle = true;
+		}
+
 		float cosineAngle = winningObjectNormal.DotProduct(lightDirection);
-		if (cosineAngle > 0)
+
+		if (isTriangle) {
+			printf("%f \n", cosineAngle);
+		}
+
+		if (cosineAngle >= 0)
 		{
 			// test for shadows
 			bool shadowed = false;
@@ -389,6 +402,7 @@ Color GetColorAt(Vect intersectionPosition,
 					if (secondaryIntersections.at(c) <= distanceToLightMagnitude)
 					{
 						shadowed = true;
+
 					}
 					break;
 				}
@@ -450,7 +464,8 @@ int main(int argc, char const *argv[])
 	Vect Y(0, 1, 0);
 	Vect Z(0, 0, 1);
  
-	Vect camPos(6, 3, -8);
+	Vect camPos(1.5, 0.75, -2);
+	// Vect camPos(0, 0, -4);
 	Vect lookAt(0, 0, 0);
 	Vect diffBtw(camPos.getVectX() - lookAt.getVectX(), camPos.getVectY() - lookAt.getVectY(), camPos.getVectZ() - lookAt.getVectZ());
 	
@@ -468,26 +483,29 @@ int main(int argc, char const *argv[])
 	Color maroon(0.5, 0.25, 0.25);
 
 	Material tile(true, false, false, 0.0, 0.0);
+	Material matt(false, false, false, 0.0, 0.0);
 	Material shiny(false, true, false, 0.3, 0.0);
 	Material glass(false, true, true, 0.3, 1.46);
 
 
-	Vect lightPosition(-5, 10, -2);
-	Vect lightPosition2(10, 10, 3);
+	Vect lightPosition(-7, 10, -10);
+	//Vect lightPosition2(10, 10, 3);
 
 	Light sceneLight(lightPosition, whiteLight);
-	Light sceneLight2(lightPosition2, whiteLight);
+	//Light sceneLight2(lightPosition2, whiteLight);
 
 	// scene objects
-	Sphere sceneSphere(O, 1, prettyGreen, shiny);
-	Sphere sceneSphere2(O.VectAdd(Vect(1.5, 0, 0)), 1, Color(0.8, 0, 0), shiny);
-	Sphere sceneSphere3(O.VectAdd(Vect(0, 1.5, 0)), 1.2, Color(0, 0.8, 0), shiny);
-	Sphere sceneSphere4(O.VectAdd(Vect(1.0, 0, -1)), 0.8, Color(0.0, 0.0, 0.0), glass);
+	// Sphere sceneSphere(O, 1, prettyGreen, shiny);
+	Sphere sceneSphere2(X, 0.1, Color(0.8, 0.0, 0.0), shiny);
+	Sphere sceneSphere3(Y, 0.1, Color(0.0, 0.8, 0.0), shiny);
+	Sphere sceneSphere4(Z, 0.1, Color(0.0, 0.0, 0.8), shiny);
 
-	Plane scenePlane(Y, -1, tileFloor, tile);
-	Plane wallPlane(X, -7, gray, shiny);
+	Plane scenePlane(Y, -10, tileFloor, tile);
+	Plane wallPlane(X, -7, gray, glass);
 	Plane wallPlane2(Z, 7, gray, shiny);
 
+	// Triangle sceneTriangle(O, O.VectAdd(Vect(0, 2, 0)), O.VectAdd(Vect(2, 0, 0)), prettyGreen, matt);
+	Triangle sceneTriangle(X.VectAdd(Vect(0, 0, 0)), Y.VectAdd(Vect(0, 0, 0)), Z.VectAdd(Vect(0, 0, 0)), prettyGreen, matt);
 
 	double xAmount, yAmount;
 	Vect camRayOrigin = sceneCam.getCameraPosition();
@@ -496,16 +514,17 @@ int main(int argc, char const *argv[])
 	// create array of scene objects and add them
 	vector<Object*> sceneObjects;
 	sceneObjects.push_back(dynamic_cast<Object*>(&scenePlane));
-	sceneObjects.push_back(dynamic_cast<Object*>(&sceneSphere));
+	// sceneObjects.push_back(dynamic_cast<Object*>(&sceneSphere));
 	sceneObjects.push_back(dynamic_cast<Object*>(&sceneSphere2));
 	sceneObjects.push_back(dynamic_cast<Object*>(&sceneSphere3));
 	sceneObjects.push_back(dynamic_cast<Object*>(&sceneSphere4));
 	sceneObjects.push_back(dynamic_cast<Object*>(&wallPlane));
 	sceneObjects.push_back(dynamic_cast<Object*>(&wallPlane2));
+	sceneObjects.push_back(dynamic_cast<Object*>(&sceneTriangle));
 
 	vector<Source*> lightSources;
 	lightSources.push_back(dynamic_cast<Source*>(&sceneLight));
-	lightSources.push_back(dynamic_cast<Source*>(&sceneLight2));
+	//lightSources.push_back(dynamic_cast<Source*>(&sceneLight2));
 
 	int aaIndex;
 
