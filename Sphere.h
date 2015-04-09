@@ -91,7 +91,7 @@ public:
 		}
 		else
 		{
-			// the ray missed the sphere:w
+			// the ray missed the sphere
 			return -1;
 		}
 	}

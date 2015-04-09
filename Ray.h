@@ -5,7 +5,6 @@
 
 class Ray
 {
-	int id;
 	int remainingIntersections;	
 	Vect origin;
 	Vect direction;
@@ -33,11 +32,6 @@ public:
 		return refractiveIndex;
 	}
 
-	int GetID()
-	{
-		return id;
-	}
-
 	int GetRemainingIntersections()
 	{
 		return remainingIntersections;
@@ -63,7 +57,7 @@ Ray::Ray()
 	origin          = Vect(0, 0, 0);
 	direction       = Vect(1, 0, 0);
 	refractiveIndex = 1.000293;
-	id = 0;
+	remainingIntersections = 100;
 }
 
 Ray::Ray(Vect o, Vect d)
@@ -71,7 +65,7 @@ Ray::Ray(Vect o, Vect d)
 	origin          = o;
 	direction       = d;
 	refractiveIndex = 1.000293;
-	id = 0;
+	remainingIntersections = 100;
 }
 
 Ray::Ray(Vect o, Vect d, double r, int i)
@@ -79,7 +73,7 @@ Ray::Ray(Vect o, Vect d, double r, int i)
 	origin          = o;
 	direction       = d;
 	refractiveIndex = r;
-	id = i;
+	remainingIntersections = i;
 }
 
 #endif // RAY_H

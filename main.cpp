@@ -187,18 +187,26 @@ Color GetRefractedColor(Ray refractionRay,
 
 	double n  = n1 / n2;
 
-	Vect intersectingRayDirection = refractionRay.GetRayDirection();
-	Vect winningObjectNormal = sceneObjects.at(indexOfWinningObject)->GetNormalAt(intersectionPosition);
+	Vect I = refractionRay.GetRayDirection();
+	Vect N = sceneObjects.at(indexOfWinningObject)->GetNormalAt(intersectionPosition);
 
-	double c1 = -winningObjectNormal.DotProduct(intersectingRayDirection);
-	double c2 = sqrt(1 - (n * n) * (1 - c1 * c1));
+	double cosTheta1 = -N.DotProduct(I);
+	// we need the normal pointing towards the side the ray is coming from
+	if (cosTheta1 < 0) 
+	{
+		N = N.Negative();
+		cosTheta1 = -N.DotProduct(I);
+	}
 
-	Vect nTimesV = intersectingRayDirection.VectMult(n);
-	double nTimesC1MinusC2 = n * c1 - c2;
-	Vect timesN = winningObjectNormal.VectMult(nTimesC1MinusC2);
+	double sinTheta2 = n * sqrt(1 - (cosTheta1 * cosTheta1));
+	if (sinTheta2 > 1) {
+		printf("Total refraction\n");
+	}
+	double cosTheta2 = sqrt(1 - (n * n) * (1 - (cosTheta1 * cosTheta1)));
+	Vect refractionDirection = I.VectMult(n).VectAdd(N.VectMult(n * cosTheta1 - cosTheta2));
 
-	Vect refractionDirection = nTimesV.VectAdd(timesN).Normalize();
-	Ray newRefractionRay(intersectionPosition, refractionDirection, n2, refractionRay.GetID());
+
+	Ray newRefractionRay(intersectionPosition.VectAdd(refractionDirection.VectMult(0.015)), refractionDirection, n2, refractionRay.GetRemainingIntersections());
 	// printf("Created refraction ray\n");
 	vector<double> refractionIntersections;
 	for (int refractionID = 0; refractionID < sceneObjects.size(); refractionID++)
@@ -218,8 +226,8 @@ Color GetRefractedColor(Ray refractionRay,
 		if (refractionIntersections.at(indexOfWinningObjectWithRefraction) > accuracy)
 		{
 			Vect refractionIntersectionPosition = intersectionPosition.VectAdd(refractionDirection.VectMult(refractionIntersections.at(indexOfWinningObjectWithRefraction)));
-			Vect objectNormal = sceneObjects.at(indexOfWinningObjectWithRefraction)->GetNormalAt(refractionIntersectionPosition);
-			Color objectColor = sceneObjects.at(indexOfWinningObjectWithRefraction)->GetColor();
+			// Vect objectNormal = sceneObjects.at(indexOfWinningObjectWithRefraction)->GetNormalAt(refractionIntersectionPosition);
+			// Color objectColor = sceneObjects.at(indexOfWinningObjectWithRefraction)->GetColor();
 
 			// printf("Got stuff for get color\n");
 				// printf("Getting final color\n");
@@ -259,9 +267,11 @@ Color GetColorAt(Vect intersectionPosition,
 	Material winningObjectMaterial = sceneObjects.at(indexOfWinningObject)->GetMaterial();
 	Vect intersectingRayDirection  = intersectionRay.GetRayDirection();
 
+	intersectionRay.SubstractIntersection();
+
 	//printf("Got stuff in get color at\n");
 
-	if (winningObjectMaterial.GetIsTile() == true)
+	if (winningObjectMaterial.GetIsTile() == true && intersectionRay.GetRemainingIntersections() > 0)
 	{
 		 // checker pattern
 		int square = (int) floor(intersectionPosition.getVectX()) + (int) floor(intersectionPosition.getVectZ());
@@ -287,29 +297,29 @@ Color GetColorAt(Vect intersectionPosition,
 
 	//printf("Got ambientLight\n");
 	// refraction
-	//if (winningObjectMaterial.GetIsRefractive() == true)
-	//{
-		//printf("Is refractive\n");
-		//printf("ID: %d\n", intersectionRay.GetID());
+	if (winningObjectMaterial.GetIsRefractive() == true && intersectionRay.GetRemainingIntersections() > 0)
+	{
+		// printf("Is refractive\n");
+		// printf("Remaining: %d\n", intersectionRay.GetRemainingIntersections());
 
-		//Vect refractionPosition = intersectionPosition.VectAdd(Vect(accuracy* 10, accuracy * 10, accuracy * 10));
-		//// refracting = true;
-		//Color refractionColor = GetRefractedColor( intersectionRay,
-												   //refractionPosition,
-												   //sceneObjects,
-												   //indexOfWinningObject,
-												   //lightSources,
-												   //accuracy,
-												   //ambientLight);
+		// refracting = true;
+		Color refractionColor = GetRefractedColor( intersectionRay,
+												   intersectionPosition,
+												   sceneObjects,
+												   indexOfWinningObject,
+												   lightSources,
+												   accuracy,
+												   ambientLight);
 
-		//// refracting = false;
-		//finalColor = refractionColor;
-	//}
+		// refracting = false;
+		finalColor = refractionColor;
+	}
 
 
 	// printf("Checked for refraction\n");
 
-	if (winningObjectMaterial.GetIsReflective() == true && intersectionRay.GetRefractiveIndex() != winningObjectMaterial.GetRefractiveIndex())
+	if (winningObjectMaterial.GetIsReflective() == true &&
+		intersectionRay.GetRemainingIntersections() > 0)
 	{
 		//printf("Material is reflective\n");
 		// reflection of objects with specular intersection
@@ -320,7 +330,7 @@ Color GetColorAt(Vect intersectionPosition,
 		Vect add2    = intersectingRayDirection.VectAdd(scalar2);
 		Vect reflectionDirection = add2.Normalize();
 
-		Ray reflectionRay(intersectionPosition, reflectionDirection, 1.000293, intersectionRay.GetID());
+		Ray reflectionRay(intersectionPosition, reflectionDirection, 1.000293, intersectionRay.GetRemainingIntersections());
 
 		//printf("Computed the new ray\n");
 
@@ -358,8 +368,9 @@ Color GetColorAt(Vect intersectionPosition,
 	}
 
 	// printf("Checked for reflection\n");
-
-	for (int lightIndex = 0; lightIndex < lightSources.size(); lightIndex++)
+	if(winningObjectMaterial.GetIsRefractive() == false)
+	{
+		for (int lightIndex = 0; lightIndex < lightSources.size(); lightIndex++)
 	{
 		Vect lightDirection = lightSources.at(lightIndex)->GetLightPosition().VectAdd(intersectionPosition.Negative()).Normalize();
 
@@ -371,10 +382,6 @@ Color GetColorAt(Vect intersectionPosition,
 		}
 
 		float cosineAngle = winningObjectNormal.DotProduct(lightDirection);
-
-		if (isTriangle) {
-			printf("%f \n", cosineAngle);
-		}
 
 		if (cosineAngle >= 0)
 		{
@@ -436,7 +443,9 @@ Color GetColorAt(Vect intersectionPosition,
 				}
 			}
 		}
+	}	
 	}
+	
 
 	return finalColor.Clip();
 }
@@ -454,7 +463,7 @@ int main(int argc, char const *argv[])
 	double aspectRatio  = (double) width / (double) height;
 	double ambientLight = 0.3;
 	double accuracy     = 0.000001;
-	int aadepth 		= 1;
+	int aadepth 		= 3;
 
 	RGBType *pixels = new RGBType[n];
 	int thisOne;
@@ -485,7 +494,7 @@ int main(int argc, char const *argv[])
 	Material tile(true, false, false, 0.0, 0.0);
 	Material matt(false, false, false, 0.0, 0.0);
 	Material shiny(false, true, false, 0.3, 0.0);
-	Material glass(false, true, true, 0.3, 1.46);
+	Material glass(false, false, true, 0.3, 1.46);
 
 
 	Vect lightPosition(-7, 10, -10);
@@ -495,13 +504,13 @@ int main(int argc, char const *argv[])
 	//Light sceneLight2(lightPosition2, whiteLight);
 
 	// scene objects
-	// Sphere sceneSphere(O, 1, prettyGreen, shiny);
-	Sphere sceneSphere2(X, 0.1, Color(0.8, 0.0, 0.0), shiny);
-	Sphere sceneSphere3(Y, 0.1, Color(0.0, 0.8, 0.0), shiny);
-	Sphere sceneSphere4(Z, 0.1, Color(0.0, 0.0, 0.8), shiny);
+	Sphere sceneSphere(O, 0.3, prettyGreen, glass);
+	Sphere sceneSphere2(X, 0.5, Color(0.8, 0.0, 0.0), shiny);
+	Sphere sceneSphere3(Y, 0.5, Color(0.0, 0.8, 0.0), shiny);
+	Sphere sceneSphere4(Z, 0.5, Color(0.0, 0.0, 0.8), shiny);
 
-	Plane scenePlane(Y, -10, tileFloor, tile);
-	Plane wallPlane(X, -7, gray, glass);
+	Plane scenePlane(Y, -1, tileFloor, tile);
+	Plane wallPlane(X, -7, gray, shiny);
 	Plane wallPlane2(Z, 7, gray, shiny);
 
 	// Triangle sceneTriangle(O, O.VectAdd(Vect(0, 2, 0)), O.VectAdd(Vect(2, 0, 0)), prettyGreen, matt);
@@ -514,7 +523,7 @@ int main(int argc, char const *argv[])
 	// create array of scene objects and add them
 	vector<Object*> sceneObjects;
 	sceneObjects.push_back(dynamic_cast<Object*>(&scenePlane));
-	// sceneObjects.push_back(dynamic_cast<Object*>(&sceneSphere));
+	sceneObjects.push_back(dynamic_cast<Object*>(&sceneSphere));
 	sceneObjects.push_back(dynamic_cast<Object*>(&sceneSphere2));
 	sceneObjects.push_back(dynamic_cast<Object*>(&sceneSphere3));
 	sceneObjects.push_back(dynamic_cast<Object*>(&sceneSphere4));
@@ -589,7 +598,7 @@ int main(int argc, char const *argv[])
 					camRayDirection = camDir.VectAdd(camRight.VectMult(xAmount - 0.5)
 											.VectAdd(camDown.VectMult(yAmount - 0.5)))
 											.Normalize();
-					Ray camRay(camRayOrigin, camRayDirection, 1.000293, thisOne);
+					Ray camRay(camRayOrigin, camRayDirection);
 
 					vector<double> intersections;
 
