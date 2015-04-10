@@ -1,7 +1,6 @@
 #ifndef TEXTURE_H
 #define TEXTURE_H
 
-#include "CImg.h"
 #include "Color.h"
 
 using namespace cimg_library; 

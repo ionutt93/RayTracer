@@ -57,7 +57,7 @@ Ray::Ray()
 	origin          = Vect(0, 0, 0);
 	direction       = Vect(1, 0, 0);
 	refractiveIndex = 1.000293;
-	remainingIntersections = 100;
+	remainingIntersections = 5;
 }
 
 Ray::Ray(Vect o, Vect d)
@@ -65,7 +65,7 @@ Ray::Ray(Vect o, Vect d)
 	origin          = o;
 	direction       = d;
 	refractiveIndex = 1.000293;
-	remainingIntersections = 100;
+	remainingIntersections = 5;
 }
 
 Ray::Ray(Vect o, Vect d, double r, int i)

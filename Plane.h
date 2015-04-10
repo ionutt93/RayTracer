@@ -77,8 +77,15 @@ double Plane::FindIntersection(Ray ray)
 	}
 	else
 	{
+		// N . (RO - N * d)  
 		double b = normal.DotProduct(ray.GetRayOrigin().VectAdd(normal.VectMult(distance).Negative()));
-		return -1 * b / a - 0.000001;
+		// double b = ray.GetRayOrigin().DotProduct(normal) + distance;
+		double result = -1 * b / a;
+		if (result > 0.000001)
+			return result;
+		else
+			return -1;
+		// return -1 * b / a - 0.000001;
 	}
 }
 #endif // PLANE_H

@@ -47,47 +47,58 @@ public:
 	virtual	double FindIntersection(Ray ray)
 	{
 		Vect rayOrigin = ray.GetRayOrigin();
-		double rayOriginX = rayOrigin.getVectX(); 
-		double rayOriginY = rayOrigin.getVectY(); 
-		double rayOriginZ = rayOrigin.getVectZ(); 
+		// double rayOriginX = rayOrigin.getVectX(); 
+		// double rayOriginY = rayOrigin.getVectY(); 
+		// double rayOriginZ = rayOrigin.getVectZ(); 
 
 		Vect rayDirection = ray.GetRayDirection();
-		double rayDirectionX = rayDirection.getVectX(); 
-		double rayDirectionY = rayDirection.getVectY(); 
-		double rayDirectionZ = rayDirection.getVectZ(); 
+		// double rayDirectionX = rayDirection.getVectX(); 
+		// double rayDirectionY = rayDirection.getVectY(); 
+		// double rayDirectionZ = rayDirection.getVectZ(); 
 
 		Vect sphereCenter = center;
-		double sphereCenterX = sphereCenter.getVectX(); 
-		double sphereCenterY = sphereCenter.getVectY(); 
-		double sphereCenterZ = sphereCenter.getVectZ(); 
+		// double sphereCenterX = sphereCenter.getVectX(); 
+		// double sphereCenterY = sphereCenter.getVectY(); 
+		// double sphereCenterZ = sphereCenter.getVectZ(); 
 
-		double a = 1;
-		double b = (2 * (rayOriginX - sphereCenterX) * rayDirectionX) + 
-				   (2 * (rayOriginY - sphereCenterY) * rayDirectionY) + 
-				   (2 * (rayOriginZ - sphereCenterZ) * rayDirectionZ);
-		double c = pow((rayOriginX - sphereCenterX), 2) + 
-				   pow((rayOriginY - sphereCenterY), 2) + 
-				   pow((rayOriginZ - sphereCenterZ), 2) -
-				   (radius * radius);
-		double discriminant = b * b - 4 * c;
+		// double a = 1;
+		// double b = (2 * (rayOriginX - sphereCenterX) * rayDirectionX) + 
+		// 		   (2 * (rayOriginY - sphereCenterY) * rayDirectionY) + 
+		// 		   (2 * (rayOriginZ - sphereCenterZ) * rayDirectionZ);
+		// double c = pow((rayOriginX - sphereCenterX), 2) + 
+		// 		   pow((rayOriginY - sphereCenterY), 2) + 
+		// 		   pow((rayOriginZ - sphereCenterZ), 2) -
+		// 		   (radius * radius);
+		// double discriminant = b * b - 4 * c;
 
-		if (discriminant > 0)
+		double a = rayDirection.DotProduct(rayDirection);
+		if (a < 0.01)
+			printf("Halelulya\n");
+		double b = rayOrigin.VectAdd(sphereCenter.Negative()).VectMult(2).DotProduct(rayDirection);
+		double c = rayOrigin.VectAdd(sphereCenter.Negative()).DotProduct(rayOrigin.VectAdd(sphereCenter.Negative())) - (radius * radius);
+		double discriminant = b * b - 4 * a * c;
+
+		if (discriminant >= 0)
 		{
 			// the ray intersects the sphere
 			// the first root
-			double root1 = ((-1 * b - sqrt(discriminant)) / 2) - 0.000001;
+			double root1 = ((-1 * b - sqrt(discriminant)) / 2.0 * a);
+			double root2 = ((-1 * b + sqrt(discriminant)) / 2.0 * a);
 
-			if (root1 > 0)
+			if (root1 > 0.000001)
 			{
 				// the first root is the smallest positive root
 				return root1;
 			}
-			else
+			
+			if (root2 > 0.000001)
 			{
 				// the second root is the smallest positive root
-				double root2 = ((sqrt(discriminant) - b) / 2) - 0.000001;	
+				// double root2 = ((sqrt(discriminant) - b) / 2) - 0.000001;	
 				return root2;
 			}
+
+			return -1;
 		}
 		else
 		{
