@@ -416,9 +416,9 @@ Color GetColorAt(Vect intersectionPosition,
 
 			if (shadowed == false)
 			{
-				if (winningObjectMaterial.GetIsRefractive() == false) {
+				// if (winningObjectMaterial.GetIsRefractive() == false) {
 					finalColor = finalColor.ColorAdd(winningObjectColor.ColorMultiply(lightSources.at(lightIndex)->GetLightColor()).ColorScalar(cosineAngle));
-				}
+				// }
 
 				// printf("Computing specular color\n");
 				if (winningObjectMaterial.GetIsReflective() == true)
@@ -495,22 +495,23 @@ int main(int argc, char const *argv[])
 	Material tile(true, true, false, 0.4, 0.0);
 	Material matt(false, false, false, 0.0, 0.0);
 	Material shiny(false, true, false, 0.3, 0.0);
-	Material glass(false, false, true, 0.3, 1.46);
+	Material glass(false, true, true, 0.1, 1.46);
 
 
-	Vect lightPosition(0, 10, 0);
+	Vect lightPosition(0, 3, 0);
 	//Vect lightPosition2(10, 10, 3);
 
 	Light sceneLight(lightPosition, whiteLight);
 	//Light sceneLight2(lightPosition2, whiteLight);
 
 	// scene objects
-	Sphere sceneSphere(O.VectAdd(Vect(-0.5, 0.3, -0.5)), 0.3, prettyGreen, glass);
+	Sphere sceneSphere(O.VectAdd(Vect(-0.5, 0.3, -0.5)), 0.3, Color(0.2, 0.4, 0.1), glass);
 	Sphere sceneSphere2(X, 0.5, Color(0.8, 0.0, 0.0), shiny);
 	Sphere sceneSphere3(Y, 0.5, Color(0.0, 0.8, 0.0), shiny);
 	Sphere sceneSphere4(Z, 0.5, Color(0.0, 0.0, 0.8), shiny);
 
 	Plane scenePlane(Y, -1, tileFloor, tile);
+	scenePlane.Rotate(Vect(1, 0, 0), 50.0f);
 	Plane wallPlane(X, -7, gray, shiny);
 	Plane wallPlane2(Z, 7, gray, shiny);
 

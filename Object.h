@@ -18,6 +18,12 @@ public:
 	virtual	double FindIntersection(Ray ray) { return 0; }
 
 	virtual Vect GetNormalAt(Vect point) { return Vect(0, 0, 0); }
+
+	virtual void Rotate(Vect axis, float amount) {}
+
+	virtual void Translate(Vect transform) {}
+
+	virtual void Scale(float scalar) {}
 };
 
 Object::Object() {}
