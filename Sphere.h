@@ -83,7 +83,35 @@ public:
 	}
 
 	virtual void Rotate(Vect axis, float amount) {
-		// Spheres can't be rotated if they have no textures
+		double a = amount * axis.getVectX();
+		double b = amount * axis.getVectY();
+		double c = amount * axis.getVectZ();
+
+		Vect Rx (cos(b) * cos(c), 
+				-cos(b) * sin(c), 
+				 sin(b));
+
+		Vect Ry (cos(a) * sin(c) + sin(a) * sin(b) * cos(c),	
+				 cos(a) * cos(c) - sin(a) * sin(b) * sin(c),
+				-sin(a) * cos(b));
+
+		Vect Rz (sin(a) * sin(c) - cos(a) * sin(b) * cos(c),
+				 sin(a) * cos(c) + cos(a) * sin(b) * sin(c),
+				 cos(a) * cos(b));
+
+		double newX = Rx.getVectX() * center.getVectX() +
+					  Rx.getVectY() * center.getVectY() +
+					  Rx.getVectZ() * center.getVectZ();
+
+		double newY = Ry.getVectX() * center.getVectX() +
+					  Ry.getVectY() * center.getVectY() +
+					  Ry.getVectZ() * center.getVectZ();
+
+		double newZ = Rz.getVectX() * center.getVectX() +
+					  Rz.getVectY() * center.getVectY() +
+					  Rz.getVectZ() * center.getVectZ();
+
+		center = Vect(newX, newY, newZ);
 	}
 
 	virtual void Translate(Vect transform) {

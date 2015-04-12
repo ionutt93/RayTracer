@@ -11,6 +11,7 @@ class Plane : public Object
 private:
 	Vect normal;
 	double distance;
+	Vect point;
 	Color color;
 	Material material;
 
@@ -88,6 +89,7 @@ Plane::Plane()
 {
 	normal   = Vect(1.0, 0.0, 0.0);
 	distance = 0.0;
+	// point 	 = Vect(0, 0, 0);
 	color    = Color(0.5, 0.5, 0.5);
 	material = Material();
 }
@@ -96,6 +98,7 @@ Plane::Plane(Vect n, double d, Color c, Material m)
 {
 	normal   = n;
 	distance = d;
+	// point 	 = p;
 	color    = c;
 	material = m;
 }
@@ -107,26 +110,31 @@ Vect Plane::GetNormalAt(Vect point)
 
 double Plane::FindIntersection(Ray ray)
 {
-	Vect rayDirection = ray.GetRayDirection();
-
-	double a = rayDirection.DotProduct(normal);
-	if (a == 0)
-	{
-				// ray is parallel to our plane:w
+	double a = ray.GetRayDirection().DotProduct(normal);
+	if (a == 0) {
+		// ray is parallel to our plane
 		return -1;
 	}
-	else
-	{
-		// N . (RO - N * d)  
-		double b = normal.DotProduct(ray.GetRayOrigin().VectAdd(normal.VectMult(distance).Negative()));
-		// double b = ray.GetRayOrigin().DotProduct(normal) + distance;
-		double result = -1 * b / a;
-		if (result > 0.000001)
-			return result;
-		else
-			return -1;
-		// return -1 * b / a - 0.000001;
+
+	// double b = point.VectAdd(ray.GetRayOrigin().Negative()).DotProduct(normal);
+	// double t = -1 * b / a;
+
+	// if (t > 0.000001) {
+	// 	return t;
+	// }
+
+	// return -1;
+
+	// N . (RO - N * d)  
+	double b = normal.DotProduct(ray.GetRayOrigin().VectAdd(normal.VectMult(distance).Negative()));
+	double result = -1 * b / a;
+	if (result > 0.000001) {
+		return result;
 	}
+		
+	return -1;
+	// return -1 * b / a - 0.000001;
+
 }
 #endif // PLANE_H
 

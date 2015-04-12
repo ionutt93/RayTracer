@@ -2,33 +2,50 @@
 #define TEXTURE_H
 
 #include "Color.h"
+#include "SphericalMapping.h"
 
-using namespace cimg_library; 
+using namespace std;
 
 class Texture
 {
-	CImg<unsigned char> image;
+	vector<Color> image;
+	SphericalMapping* mapping;
+
 	int hres;
 	int vres;
 
 public:
-	Texture(string);
-
-	Color GeTexturetColorAt(int, int);
+	Texture(int, int);
+	Color GetTextureColorAt(Vect);
 	
 };
 
-Texture::Texture(string source)
+
+Texture::Texture(int h, int v)
 {
-	image = CImg<unsigned char>(source);
-	hres  = image.dimx();
-	vres  = image.dimy();
+	hres = h;
+	vres = v;
+
+	image.reserve(hres * vres);
+
+	for (int i = 0; i < vres; i++) {
+		for (int j = 0; j < hres; j++) {
+			double r = ((double) rand() / (double) (RAND_MAX));
+			double g = ((double) rand() / (double) (RAND_MAX));
+			double b = ((double) rand() / (double) (RAND_MAX));
+
+			image.push_back(Color(r, g, b));
+		}
+	}
+
+	mapping = new SphericalMapping();
 }
 
-Color Texture::GetTextureColorAt(double u, double v)
+Color Texture::GetTextureColorAt(Vect hitpoint)
 {
-	int x = (hres - 1) * u;
-	int y = (vres - 1) * v;
+	int x, y;
+	mapping->GetTextureCoord(hitpoint, hres, vres, x, y);
+	return image.at(x * hres + y);
 }
 
 

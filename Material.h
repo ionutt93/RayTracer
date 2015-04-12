@@ -1,7 +1,8 @@
 #ifndef MATERIAL_H
 #define MATERIAL_H
 
-// #include "Texture.h"
+#include "Texture.h"
+#include "Vect.h"
 
 class Material {
 private:
@@ -12,11 +13,11 @@ private:
 
 	double reflectiveness;
 	double refractiveIndex;
-	// Texture texture;
+	Texture* texture;
 public:
 	Material();
 
-	Material(bool, bool, bool, double, double);
+	Material(bool, bool, bool, bool, double, double);
 
 	// getter functions
 	bool GetIsTile()
@@ -49,6 +50,11 @@ public:
 		return refractiveIndex;
 	}
 
+	virtual Color GetTextureColor(Vect hitPoint)
+	{
+		return texture->GetTextureColorAt(hitPoint);
+	}
+
 	// setter functions
 	void SetIsTile(bool c)
 	{
@@ -74,12 +80,6 @@ public:
 	{
 		refractiveIndex = r;
 	}
-
-	// void SetTexture(Texture t)
-	// {
-	// 	isTextured = true;
-	// 	texture = t;
-	// }
 };
 
 Material::Material()
@@ -91,17 +91,19 @@ Material::Material()
 	
 	reflectiveness  = 0.0;
 	refractiveIndex = 0.0;
+	texture         = new Texture(100, 100);
 }
 
-Material::Material(bool t, bool rl, bool rf, double rls, double rfs)
+Material::Material(bool t, bool rl, bool rf, bool it, double rls, double rfs)
 {
 	isTile          = t;
 	isReflective    = rl;
 	isRefractive    = rf ;
-	isTextured 		= false;
+	isTextured 		= it;
 	
 	reflectiveness  = rls;
 	refractiveIndex = rfs;
+	texture         = new Texture(100, 100);
 }
 
 #endif // MATERIAL_H

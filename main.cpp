@@ -263,11 +263,15 @@ Color GetColorAt(Vect intersectionPosition,
 				 double accuracy, 
 				 double ambientLight)
 {
-	//printf("Getting them colors\n");	
+	//printf("Getting them colors\n");
 	Color winningObjectColor       = sceneObjects.at(indexOfWinningObject)->GetColor();
 	Vect winningObjectNormal       = sceneObjects.at(indexOfWinningObject)->GetNormalAt(intersectionPosition);
 	Material winningObjectMaterial = sceneObjects.at(indexOfWinningObject)->GetMaterial();
 	Vect intersectingRayDirection  = intersectionRay.GetRayDirection();
+
+	if (winningObjectMaterial.GetIsTextured() == true) {
+		winningObjectColor = winningObjectMaterial.GetTextureColor(intersectionPosition);
+	}
 
 	intersectionRay.SubstractIntersection();
 
@@ -475,7 +479,7 @@ int main(int argc, char const *argv[])
 	Vect Z(0, 0, 1);
  
 	// Vect camPos(1.5, 0.75, -2);
-	Vect camPos(-0.7, 1, -2);
+	Vect camPos(0, 3, -3);
 	Vect lookAt(0, 0, 0);
 	Vect diffBtw(camPos.getVectX() - lookAt.getVectX(), camPos.getVectY() - lookAt.getVectY(), camPos.getVectZ() - lookAt.getVectZ());
 	
@@ -492,10 +496,11 @@ int main(int argc, char const *argv[])
 	Color black(0.0, 0.0, 0.0);
 	Color maroon(0.5, 0.25, 0.25);
 
-	Material tile(true, true, false, 0.4, 0.0);
-	Material matt(false, false, false, 0.0, 0.0);
-	Material shiny(false, true, false, 0.3, 0.0);
-	Material glass(false, true, true, 0.1, 1.46);
+	Material tile(true, true, false, false, 0.4, 0.0);
+	Material matt(false, false, false, false, 0.0, 0.0);
+	Material shiny(false, true, false, false, 0.3, 0.0);
+	Material glass(false, true, true, false, 0.1, 1.46);
+	Material textured(false, false, false, true, 0.0, 0.0);
 
 
 	Vect lightPosition(0, 3, 0);
@@ -505,18 +510,21 @@ int main(int argc, char const *argv[])
 	//Light sceneLight2(lightPosition2, whiteLight);
 
 	// scene objects
-	Sphere sceneSphere(O.VectAdd(Vect(-0.5, 0.3, -0.5)), 0.3, Color(0.2, 0.4, 0.1), glass);
+	Sphere sceneSphere(O.VectAdd(Vect(-0.5, 0.3, -0.5)), 0.7, Color(0.2, 0.4, 0.1), textured);
 	Sphere sceneSphere2(X, 0.5, Color(0.8, 0.0, 0.0), shiny);
 	Sphere sceneSphere3(Y, 0.5, Color(0.0, 0.8, 0.0), shiny);
 	Sphere sceneSphere4(Z, 0.5, Color(0.0, 0.0, 0.8), shiny);
 
-	Plane scenePlane(Y, -1, tileFloor, tile);
-	scenePlane.Rotate(Vect(1, 0, 0), 50.0f);
+	Plane scenePlane(Y.Negative(), -2, tileFloor, tile);
+	scenePlane.Rotate(Vect(1, 0, 0), 3.14f);
 	Plane wallPlane(X, -7, gray, shiny);
 	Plane wallPlane2(Z, 7, gray, shiny);
 
 	// Triangle sceneTriangle(O, O.VectAdd(Vect(0, 2, 0)), O.VectAdd(Vect(2, 0, 0)), prettyGreen, matt);
 	Triangle sceneTriangle(X.VectAdd(Vect(0, 0, 0)), Y.VectAdd(Vect(0, 0, 0)), Z.VectAdd(Vect(0, 0, 0)), prettyGreen, shiny);
+	sceneTriangle.Scale(2.0);
+	sceneTriangle.Rotate(Vect(1, 0, 0), 45);
+	sceneTriangle.Translate(Vect(2, -1, 0));
 
 	double xAmount, yAmount;
 	Vect camRayOrigin = sceneCam.getCameraPosition();
