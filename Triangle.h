@@ -9,7 +9,7 @@
 class Triangle : public Object {
 private:
 	Vect v0, v1, v2;
-	Vect normal, u, v, t;
+	Vect normal;
 
 	Color color;
 	Material material;
@@ -20,7 +20,7 @@ public:
 
 	Vect GetNormal()
 	{
-		normal = u.CrossProduct(v).Normalize();
+		normal = v1.VectAdd(v0.Negative()).CrossProduct(v2.VectAdd(v0.Negative())).Normalize();
 		return normal;
 	}
 
@@ -31,7 +31,7 @@ public:
 
 	double GetTriangleDistance()
 	{
-		distance = normal.DotProduct(v0);
+		distance = -normal.DotProduct(v0);
 		return distance;
 	}
 
@@ -62,24 +62,30 @@ public:
 		else
 		{
 			double b = normal.DotProduct(rayOrigin.VectAdd(normal.VectMult(distance).Negative()));
-			double distanceToPlane = -1 * b / a - 0.000001;
+			double distanceToPlane = -1 * b / a;
+
+			// if (distanceToPlane <= 0.000001) {
+			// 	printf("Too small\n");
+			// 	return -1;
+			// }
 
 			Vect P = rayOrigin.VectAdd(rayDirection.VectMult(distanceToPlane));
 
-			// PA
 			Vect Pv0 = P.VectAdd(v0.Negative());
-			// PB
 			Vect Pv1 = P.VectAdd(v1.Negative());
-			// PC
 			Vect Pv2 = P.VectAdd(v2.Negative());
 
-			// (CA x PA) . N >= 0
-			bool test0 = u.CrossProduct(Pv0).DotProduct(normal) >= 0;
-			// (AB x PB) . N >= 0
-			bool test1 = v.Negative().CrossProduct(Pv1).DotProduct(normal) >= 0;
+			bool test0 = v1.VectAdd(v0.Negative()).CrossProduct(Pv0).DotProduct(normal) >= 0;
+			bool test1 = v2.VectAdd(v1.Negative()).CrossProduct(Pv1).DotProduct(normal) >= 0;
+			bool test2 = v0.VectAdd(v2.Negative()).CrossProduct(Pv2).DotProduct(normal) >= 0;
+
+			// // (CA x PA) . N >= 0
+			// bool test0 = u.CrossProduct(Pv0).DotProduct(normal) >= 0;
+			// // (AB x PB) . N >= 0
 			// bool test1 = v.Negative().CrossProduct(Pv1).DotProduct(normal) >= 0;
-			// (BC x PC) . N >= 0
-			bool test2 = t.CrossProduct(Pv2).DotProduct(normal) >= 0;
+			// // bool test1 = v.Negative().CrossProduct(Pv1).DotProduct(normal) >= 0;
+			// // (BC x PC) . N >= 0
+			// bool test2 = t.CrossProduct(Pv2).DotProduct(normal) >= 0;
 
 			 if (test0 == true && test1 == true && test2 == true)
 			 {
@@ -156,39 +162,18 @@ public:
 					  Rz.getVectZ() * v2.getVectZ();
 
 		v2 = Vect(newX, newY, newZ);
-
-		// CA
-		u = v2.VectAdd(v0.Negative());
-		// BA
-		v = v1.VectAdd(v0.Negative());
-		// BC
-		t = v1.VectAdd(v2.Negative());
 	}
 
 	virtual void Scale(float scalar) {
 		v0 = v0.VectMult(scalar);
 		v1 = v1.VectMult(scalar);
 		v2 = v2.VectMult(scalar);
-
-		// CA
-		u = v2.VectAdd(v0.Negative());
-		// BA
-		v = v1.VectAdd(v0.Negative());
-		// BC
-		t = v1.VectAdd(v2.Negative());
 	}
 
 	virtual void Translate(Vect transform) {
 		v0 = v0.VectAdd(transform);
 		v1 = v1.VectAdd(transform);
 		v2 = v2.VectAdd(transform);
-
-		// CA
-		u = v2.VectAdd(v0.Negative());
-		// BA
-		v = v1.VectAdd(v0.Negative());
-		// BC
-		t = v1.VectAdd(v2.Negative());	
 	}
 };
 
@@ -197,13 +182,6 @@ Triangle::Triangle(Vect a, Vect b, Vect c, Color co, Material m)
 	v0 = a;
 	v1 = b;
 	v2 = c;
-
-	// CA
-	u = v2.VectAdd(v0.Negative());
-	// BA
-	v = v1.VectAdd(v0.Negative());
-	// BC
-	t = v1.VectAdd(v2.Negative());
 
 	color = co;
 	material = m;

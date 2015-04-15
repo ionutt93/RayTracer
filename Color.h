@@ -15,12 +15,10 @@ public:
 	double GetColorRed()     { return red;     }
 	double GetColorGreen()   { return green;   }
 	double GetColorBlue()    { return blue;    }
-	// double GetColorSpecial() { return special; }
 
-	void SetColorRed(double value)     { red     = value; }
-	void SetColorGreen(double value)   { green   = value; }
-	void SetColorBlue(double value)    { blue    = value; }
-	// void SetColorSpecial(double value) { special = value; }
+	void SetColorRed(double value)     { red   = value; }
+	void SetColorGreen(double value)   { green = value; }
+	void SetColorBlue(double value)    { blue  = value; }
 
 	double GetBrightness()
 	{

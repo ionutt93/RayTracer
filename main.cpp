@@ -381,7 +381,8 @@ Color GetColorAt(Vect intersectionPosition,
 		Vect lightDirection = lightSources.at(lightIndex)->GetLightPosition().VectAdd(intersectionPosition.Negative()).Normalize();
 		double cosineAngle = winningObjectNormal.DotProduct(lightDirection);
 
-		if (cosineAngle >= 0.0)
+
+		if (cosineAngle > 0.0)
 		{
 			// test for shadows
 			bool shadowed = false;
@@ -400,11 +401,14 @@ Color GetColorAt(Vect intersectionPosition,
 			for (int objectIndex = 0; objectIndex < sceneObjects.size() && shadowed == false; objectIndex++)
 			{
 				secondaryIntersections.push_back(sceneObjects.at(objectIndex)->FindIntersection(shadowRay)); 
+				// Triangle* t = dynamic_cast<Triangle*>(sceneObjects.at(objectIndex));
+				// if (t != NULL && indexOfWinningObject == 0 && secondaryIntersections.at(objectIndex) != -1) {
+				// 	printf("intersections : %f\n", secondaryIntersections.at(objectIndex));
+				// }
 			}
 
-			// printf("%f\n", accuracy);
-			
-			for (int c = 0; c < secondaryIntersections.size(); c++)
+			// printf("size %d\n", sceneObjects.size());
+			for (int c = 0; c < sceneObjects.size(); c++)
 			{
 				if (secondaryIntersections.at(c) > accuracy)
 				{
@@ -412,9 +416,8 @@ Color GetColorAt(Vect intersectionPosition,
 					if (secondaryIntersections.at(c) <= distanceToLightMagnitude)
 					{
 						shadowed = true;
-
+						break;
 					}
-					break;
 				}
 			}
 
@@ -479,7 +482,7 @@ int main(int argc, char const *argv[])
 	Vect Z(0, 0, 1);
  
 	// Vect camPos(1.5, 0.75, -2);
-	Vect camPos(0, 3, -3);
+	Vect camPos(0, 1.5, -6);
 	Vect lookAt(0, 0, 0);
 	Vect diffBtw(camPos.getVectX() - lookAt.getVectX(), camPos.getVectY() - lookAt.getVectY(), camPos.getVectZ() - lookAt.getVectZ());
 	
@@ -501,30 +504,34 @@ int main(int argc, char const *argv[])
 	Material shiny(false, true, false, false, 0.3, 0.0);
 	Material glass(false, true, true, false, 0.1, 1.46);
 	Material textured(false, false, false, true, 0.0, 0.0);
+	textured.SetTexture(256, 256, "texture2.bmp");
 
-
-	Vect lightPosition(0, 3, 0);
+	Vect lightPosition(0, 10, -10);
 	//Vect lightPosition2(10, 10, 3);
 
 	Light sceneLight(lightPosition, whiteLight);
 	//Light sceneLight2(lightPosition2, whiteLight);
 
 	// scene objects
-	Sphere sceneSphere(O.VectAdd(Vect(-0.5, 0.3, -0.5)), 0.7, Color(0.2, 0.4, 0.1), textured);
-	Sphere sceneSphere2(X, 0.5, Color(0.8, 0.0, 0.0), shiny);
-	Sphere sceneSphere3(Y, 0.5, Color(0.0, 0.8, 0.0), shiny);
-	Sphere sceneSphere4(Z, 0.5, Color(0.0, 0.0, 0.8), shiny);
+	Sphere sceneSphere(O.VectAdd(Vect(-0.5, 0.3, -0.5)), 0.3, Color(0.2, 0.4, 0.1), matt);
+	Sphere sceneSphere2(X, 0.5, Color(0.8, 0.0, 0.0), matt);
+	Sphere sceneSphere3(Y, 0.5, Color(0.0, 0.8, 0.0), matt);
+	Sphere sceneSphere4(Z, 0.5, Color(0.0, 0.0, 0.8), matt);
+	Sphere sceneSphere5(Vect(2, 1, -0.5), 0.3, maroon, matt);
+	Sphere sceneSphere6(Vect(1, 1.1, 1.5), 0.7, gray, matt);
+	Sphere sceneSphere7(Vect(-2, 1.3, 0.0), 0.9, Color(0.2, 0.1, 0.5), matt);
 
-	Plane scenePlane(Y.Negative(), -2, tileFloor, tile);
-	scenePlane.Rotate(Vect(1, 0, 0), 3.14f);
-	Plane wallPlane(X, -7, gray, shiny);
-	Plane wallPlane2(Z, 7, gray, shiny);
+	Plane scenePlane(Y, -3, tileFloor, matt);
+	Plane wallPlane(X, -7, gray, matt);
+	Plane wallPlane2(Z, 7, gray, matt);
+	Plane wallPlane3(X, 7, gray, matt);
 
-	// Triangle sceneTriangle(O, O.VectAdd(Vect(0, 2, 0)), O.VectAdd(Vect(2, 0, 0)), prettyGreen, matt);
-	Triangle sceneTriangle(X.VectAdd(Vect(0, 0, 0)), Y.VectAdd(Vect(0, 0, 0)), Z.VectAdd(Vect(0, 0, 0)), prettyGreen, shiny);
-	sceneTriangle.Scale(2.0);
-	sceneTriangle.Rotate(Vect(1, 0, 0), 45);
-	sceneTriangle.Translate(Vect(2, -1, 0));
+	Triangle sceneTriangle(O, Vect(0, 2, 0), Vect(2, 0, 0), prettyGreen, matt);
+	Triangle sceneTriangle2(O, Vect(0, -2, 0), Vect(-2, 0, 0), prettyGreen, matt);
+	Triangle sceneTriangle3(Vect(2, -2, 0), Vect(0, -2, 0), Vect(2, 0, 0), Color(0.2, 0.3, 0.4), matt);
+	Triangle sceneTriangle4(Vect(-2, 2, 0), Vect(0, 2, 0), Vect(-2, 0, 0), Color(0.2, 0.3, 0.4), matt);
+
+	// Triangle sceneTriangle(X.VectAdd(Vect(0, 0, 0)), Y.VectAdd(Vect(0, 0, 0)), Z.VectAdd(Vect(0, 0, 0)), prettyGreen, shiny);
 
 	double xAmount, yAmount;
 	Vect camRayOrigin = sceneCam.getCameraPosition();
@@ -537,9 +544,16 @@ int main(int argc, char const *argv[])
 	sceneObjects.push_back(dynamic_cast<Object*>(&sceneSphere2));
 	sceneObjects.push_back(dynamic_cast<Object*>(&sceneSphere3));
 	sceneObjects.push_back(dynamic_cast<Object*>(&sceneSphere4));
+	sceneObjects.push_back(dynamic_cast<Object*>(&sceneSphere5));
+	sceneObjects.push_back(dynamic_cast<Object*>(&sceneSphere6));
+	sceneObjects.push_back(dynamic_cast<Object*>(&sceneSphere7));
 	sceneObjects.push_back(dynamic_cast<Object*>(&wallPlane));
 	sceneObjects.push_back(dynamic_cast<Object*>(&wallPlane2));
+	sceneObjects.push_back(dynamic_cast<Object*>(&wallPlane3));
 	sceneObjects.push_back(dynamic_cast<Object*>(&sceneTriangle));
+	sceneObjects.push_back(dynamic_cast<Object*>(&sceneTriangle2));
+	sceneObjects.push_back(dynamic_cast<Object*>(&sceneTriangle3));
+	sceneObjects.push_back(dynamic_cast<Object*>(&sceneTriangle4));
 
 	vector<Source*> lightSources;
 	lightSources.push_back(dynamic_cast<Source*>(&sceneLight));

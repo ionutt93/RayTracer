@@ -89,7 +89,6 @@ Plane::Plane()
 {
 	normal   = Vect(1.0, 0.0, 0.0);
 	distance = 0.0;
-	// point 	 = Vect(0, 0, 0);
 	color    = Color(0.5, 0.5, 0.5);
 	material = Material();
 }
@@ -98,7 +97,6 @@ Plane::Plane(Vect n, double d, Color c, Material m)
 {
 	normal   = n;
 	distance = d;
-	// point 	 = p;
 	color    = c;
 	material = m;
 }
@@ -116,15 +114,6 @@ double Plane::FindIntersection(Ray ray)
 		return -1;
 	}
 
-	// double b = point.VectAdd(ray.GetRayOrigin().Negative()).DotProduct(normal);
-	// double t = -1 * b / a;
-
-	// if (t > 0.000001) {
-	// 	return t;
-	// }
-
-	// return -1;
-
 	// N . (RO - N * d)  
 	double b = normal.DotProduct(ray.GetRayOrigin().VectAdd(normal.VectMult(distance).Negative()));
 	double result = -1 * b / a;
@@ -133,8 +122,6 @@ double Plane::FindIntersection(Ray ray)
 	}
 		
 	return -1;
-	// return -1 * b / a - 0.000001;
-
 }
 #endif // PLANE_H
 

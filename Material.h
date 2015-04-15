@@ -40,6 +40,10 @@ public:
 		return isTextured;
 	}
 
+	void SetTexture(int hres, int vres, const char* fileName) {
+		texture = new Texture(hres, vres, fileName);
+	}
+
 	double GetReflectiveness()
 	{
 		return reflectiveness;
@@ -52,7 +56,10 @@ public:
 
 	virtual Color GetTextureColor(Vect hitPoint)
 	{
-		return texture->GetTextureColorAt(hitPoint);
+		if (texture)
+			return texture->GetTextureColorAt(hitPoint);
+		else
+			return Color(0, 0, 0);
 	}
 
 	// setter functions
@@ -91,7 +98,6 @@ Material::Material()
 	
 	reflectiveness  = 0.0;
 	refractiveIndex = 0.0;
-	texture         = new Texture(100, 100);
 }
 
 Material::Material(bool t, bool rl, bool rf, bool it, double rls, double rfs)
@@ -103,7 +109,6 @@ Material::Material(bool t, bool rl, bool rf, bool it, double rls, double rfs)
 	
 	reflectiveness  = rls;
 	refractiveIndex = rfs;
-	texture         = new Texture(100, 100);
 }
 
 #endif // MATERIAL_H
