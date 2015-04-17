@@ -270,7 +270,16 @@ Color GetColorAt(Vect intersectionPosition,
 	Vect intersectingRayDirection  = intersectionRay.GetRayDirection();
 
 	if (winningObjectMaterial.GetIsTextured() == true) {
-		winningObjectColor = winningObjectMaterial.GetTextureColor(intersectionPosition);
+		Sphere* s = dynamic_cast<Sphere*> (sceneObjects.at(indexOfWinningObject));
+		if (s != NULL) {
+			Vect hitPoint = intersectionPosition.VectAdd(s->GetSphereCenter().Negative());	
+			double radius = s->GetSphereRadius();
+			double r = 1 / radius;
+			Vect localHitPoint = hitPoint.VectMult(r);
+
+			winningObjectColor = winningObjectMaterial.GetTextureColor(localHitPoint);
+		}
+		
 	}
 
 	intersectionRay.SubstractIntersection();
@@ -359,7 +368,7 @@ Color GetColorAt(Vect intersectionPosition,
 				// determine the position and direction at the point of intersection with the reflection ray
 				// the ray only affects color if it is reflected of something
 				Vect reflectionIntersectionPosition     = intersectionPosition.VectAdd(reflectionDirection.VectMult(reflectionIntersections.at(indexOfWinningObjectWithReflection)));
-				Vect reflectionIntersectingRayDirection = reflectionDirection;
+				// Vect reflectionIntersectingRayDirection = reflectionDirection;
 
 				//printf("Computed position and direction\n");
 				//printf("Position: %f %f %f \n", reflectionIntersectionPosition.getVectX(), reflectionIntersectionPosition.getVectY(), reflectionIntersectionPosition.getVectZ());
@@ -423,9 +432,9 @@ Color GetColorAt(Vect intersectionPosition,
 
 			if (shadowed == false)
 			{
-				// if (winningObjectMaterial.GetIsRefractive() == false) {
+				if (winningObjectMaterial.GetIsRefractive() == false) {
 					finalColor = finalColor.ColorAdd(winningObjectColor.ColorMultiply(lightSources.at(lightIndex)->GetLightColor()).ColorScalar(cosineAngle));
-				// }
+				}
 
 				// printf("Computing specular color\n");
 				if (winningObjectMaterial.GetIsReflective() == true)
@@ -443,7 +452,7 @@ Color GetColorAt(Vect intersectionPosition,
 					if (specular > 0)
 					{
 						// printf("Specular > 0 %.10f\n", specular);
-						specular = pow(specular, 10.0);
+						specular = pow(specular, 20.0);
 						// printf("After specular %.10f\n", specular);
 						finalColor = finalColor.ColorAdd(lightSources.at(lightIndex)->GetLightColor()
 														.ColorScalar(specular * winningObjectMaterial.GetReflectiveness()));
@@ -481,8 +490,8 @@ int main(int argc, char const *argv[])
 	Vect Y(0, 1, 0);
 	Vect Z(0, 0, 1);
  
-	// Vect camPos(1.5, 0.75, -2);
-	Vect camPos(0, 1.5, -6);
+	// Vect camPos(0, 10, 1);
+	Vect camPos(0, 2.5, -6);
 	Vect lookAt(0, 0, 0);
 	Vect diffBtw(camPos.getVectX() - lookAt.getVectX(), camPos.getVectY() - lookAt.getVectY(), camPos.getVectZ() - lookAt.getVectZ());
 	
@@ -502,32 +511,33 @@ int main(int argc, char const *argv[])
 	Material tile(true, true, false, false, 0.4, 0.0);
 	Material matt(false, false, false, false, 0.0, 0.0);
 	Material shiny(false, true, false, false, 0.3, 0.0);
-	Material glass(false, true, true, false, 0.1, 1.46);
+	Material glass(false, false, true, false, 0.1, 1.46);
 	Material textured(false, false, false, true, 0.0, 0.0);
-	textured.SetTexture(256, 256, "texture2.bmp");
+	textured.SetTexture(256, 256, "texture.bmp");
 
-	Vect lightPosition(0, 10, -10);
+
+	Vect lightPosition(0, 10, -6);
 	//Vect lightPosition2(10, 10, 3);
 
 	Light sceneLight(lightPosition, whiteLight);
 	//Light sceneLight2(lightPosition2, whiteLight);
 
 	// scene objects
-	Sphere sceneSphere(O.VectAdd(Vect(-0.5, 0.3, -0.5)), 0.3, Color(0.2, 0.4, 0.1), matt);
-	Sphere sceneSphere2(X, 0.5, Color(0.8, 0.0, 0.0), matt);
-	Sphere sceneSphere3(Y, 0.5, Color(0.0, 0.8, 0.0), matt);
-	Sphere sceneSphere4(Z, 0.5, Color(0.0, 0.0, 0.8), matt);
-	Sphere sceneSphere5(Vect(2, 1, -0.5), 0.3, maroon, matt);
-	Sphere sceneSphere6(Vect(1, 1.1, 1.5), 0.7, gray, matt);
-	Sphere sceneSphere7(Vect(-2, 1.3, 0.0), 0.9, Color(0.2, 0.1, 0.5), matt);
+	Sphere sceneSphere(O.VectAdd(Vect(-0.5, 0.3, -0.5)), 0.3, Color(0.2, 0.4, 0.1), shiny);
+	Sphere sceneSphere2(X.VectAdd(Vect(0, 0, -2)), 0.5, Color(0.8, 0.0, 0.0), shiny);
+	Sphere sceneSphere3(Y.VectAdd(Vect(0, 0, -2)), 0.5, Color(0.0, 0.8, 0.0), shiny);
+	Sphere sceneSphere4(Z.VectAdd(Vect(0, 0, -2)), 0.5, Color(0.0, 0.0, 0.8), shiny);
+	Sphere sceneSphere5(Vect(2, 1, -2), 0.3, maroon, shiny);
+	Sphere sceneSphere6(Vect(1.3, 1.5, -1.5), 0.7, gray, shiny);
+	Sphere sceneSphere7(Vect(-2, 1.3, -2.0), 0.9, Color(0.2, 0.1, 0.5), shiny);
 
-	Plane scenePlane(Y, -3, tileFloor, matt);
-	Plane wallPlane(X, -7, gray, matt);
-	Plane wallPlane2(Z, 7, gray, matt);
-	Plane wallPlane3(X, 7, gray, matt);
+	Plane scenePlane(Y, -3, tileFloor, tile);
+	// Plane wallPlane(X, -7, gray, matt);
+	Plane wallPlane2(Z.Negative(), -7, maroon, matt);
+	// Plane wallPlane3(X.Negative(), -7, gray, matt);
 
 	Triangle sceneTriangle(O, Vect(0, 2, 0), Vect(2, 0, 0), prettyGreen, matt);
-	Triangle sceneTriangle2(O, Vect(0, -2, 0), Vect(-2, 0, 0), prettyGreen, matt);
+	Triangle sceneTriangle2(O, Vect(0, -2, 0), Vect(-2, 0, 0), maroon, matt);
 	Triangle sceneTriangle3(Vect(2, -2, 0), Vect(0, -2, 0), Vect(2, 0, 0), Color(0.2, 0.3, 0.4), matt);
 	Triangle sceneTriangle4(Vect(-2, 2, 0), Vect(0, 2, 0), Vect(-2, 0, 0), Color(0.2, 0.3, 0.4), matt);
 
@@ -547,9 +557,9 @@ int main(int argc, char const *argv[])
 	sceneObjects.push_back(dynamic_cast<Object*>(&sceneSphere5));
 	sceneObjects.push_back(dynamic_cast<Object*>(&sceneSphere6));
 	sceneObjects.push_back(dynamic_cast<Object*>(&sceneSphere7));
-	sceneObjects.push_back(dynamic_cast<Object*>(&wallPlane));
+	// sceneObjects.push_back(dynamic_cast<Object*>(&wallPlane));
 	sceneObjects.push_back(dynamic_cast<Object*>(&wallPlane2));
-	sceneObjects.push_back(dynamic_cast<Object*>(&wallPlane3));
+	// sceneObjects.push_back(dynamic_cast<Object*>(&wallPlane3));
 	sceneObjects.push_back(dynamic_cast<Object*>(&sceneTriangle));
 	sceneObjects.push_back(dynamic_cast<Object*>(&sceneTriangle2));
 	sceneObjects.push_back(dynamic_cast<Object*>(&sceneTriangle3));
